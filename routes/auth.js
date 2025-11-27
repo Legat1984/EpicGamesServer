@@ -245,7 +245,7 @@ router.post('/reset-password', [
       return res.status(200).json({ errors: 'Токен недействителен или истек.' });
     }
 
-    // Обновление пароля без дополнительного хэширования
+    // Обновление пароля (хэширование будет выполнено в модели)
     user.password = newPassword;
 
     await user.save();
