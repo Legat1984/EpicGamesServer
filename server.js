@@ -17,22 +17,29 @@ const app = express()
 // Определяем порт, на котором будет запущен сервер
 const PORT = process.env.PORT || 5000
 // Включаем поддержку CORS для разрешения кросс-доменных запросов
-app.use(cors())
+const corsOptions = {
+  origin: [
+    "http://109.71.242.8:3000"  // ваш фронтенд
+  ],
+  credentials: true,
+  optionsSuccessStatus: 200
+};
+app.use(cors(corsOptions));
 
 // Включаем парсинг JSON из входящих HTTP-запросов
 app.use(bodyParser.json())
 
 // Подключаемся к MongoDB, указывая URL и настройки для подключения
 mongoose.connect(process.env.MONGO_URL)
-.catch((err) => {
+  .catch((err) => {
     throw new Error(`Произошла ошибка подключения к базе данных: ${err}`)
-})
+  })
 
 // Получаем экземпляр подключения к базе данных
 const connection = mongoose.connection
 // Настраиваем обработчик события "open" для подключения к MongoDB
 connection.once('open', () => {
-    console.log('Подключение к базе данных MongoDB установлено')
+  console.log('Подключение к базе данных MongoDB установлено')
 })
 
 // Подключаем роуты
@@ -45,7 +52,9 @@ const http = require('http');
 const server = http.createServer(app);
 const io = require('socket.io')(server, {
   cors: {
-    origin: "*", // В продакшене укажите конкретный домен
+    origin: [
+      "http://109.71.242.8:3000"  // ваш фронтенд
+    ],
     methods: ["GET", "POST"],
     credentials: true
   },
