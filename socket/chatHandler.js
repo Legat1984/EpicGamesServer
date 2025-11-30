@@ -35,7 +35,7 @@ module.exports = (io) => {
 
         // Отправляем историю сообщений пользователю
         const messages = await Message.find({ room: roomId })
-          .populate('user', 'username avatar')
+          .populate('user', 'login avatar')
           .sort({ createdAt: 1 })
           .limit(50); // ограничиваем количество сообщений
 
@@ -59,7 +59,7 @@ module.exports = (io) => {
         });
 
         const message = await newMessage.save();
-        await message.populate('user', 'username avatar');
+        await message.populate('user', 'login avatar');
 
         // Рассылаем сообщение всем участникам комнаты
         io.to(roomId).emit('receiveMessage', message);

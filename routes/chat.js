@@ -7,7 +7,7 @@ const auth = require('../middleware/authMiddleware');
 // Получить все комнаты
 router.get('/rooms', auth, async (req, res) => {
   try {
-    const rooms = await Room.find().populate('participants', 'username email');
+    const rooms = await Room.find().populate('participants', 'login email');
     res.json(rooms);
   } catch (err) {
     console.error(err.message);
@@ -20,7 +20,7 @@ router.get('/rooms/:roomId/messages', auth, async (req, res) => {
   try {
     const { roomId } = req.params;
     const messages = await Message.find({ room: roomId })
-      .populate('user', 'username avatar')
+      .populate('user', 'login avatar')
       .sort({ createdAt: 1 });
 
     res.json(messages);
@@ -42,7 +42,7 @@ router.post('/messages', auth, async (req, res) => {
     });
 
     const message = await newMessage.save();
-    await message.populate('user', 'username avatar');
+    await message.populate('user', 'login avatar');
 
     res.json(message);
   } catch (err) {
