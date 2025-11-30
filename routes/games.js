@@ -81,4 +81,20 @@ router.post('/favorite/remove/:gameId', authMiddleware, async (req, res) => {
     }
 });
 
+router.get('/favorite', authMiddleware, async (req, res) => {
+    try {
+        const userId = req.user.userId;
+
+        const user = await User.findById(userId).populate('favoriteGames');
+        if (!user) {
+            return res.status(200).json({ errors: 'Пользователь не найден' });
+        }
+
+        res.status(200).json({ favoriteGames: user.favoriteGames });
+    } catch (error) {
+        console.error(error);
+        res.status(200).json({ errors: `Ошибка сервера: ${error}` });
+    }
+});
+
 module.exports = router
