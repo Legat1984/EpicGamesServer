@@ -4,6 +4,21 @@ const Room = require('../models/Room');
 const Message = require('../models/Message');
 const auth = require('../middleware/authMiddleware');
 
+// Получить общую комнату (для всех пользователей)
+router.get('/rooms/general', async (req, res) => {
+  try {
+    const room = await Room.findOne({ name: 'Общий' });
+    console.log(room)
+    if (!room) {
+      return res.status(404).json({ message: 'Общая комната не найдена' });
+    }
+    res.json(room);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server Error');
+  }
+});
+
 // Получить все комнаты
 router.get('/rooms', auth, async (req, res) => {
   try {
