@@ -9,6 +9,7 @@ const cors = require('cors'); // Модуль для настройки CORS (Cr
 // Импортируем роуты
 const authRoutes = require('./routes/auth');
 const gamesRoutes = require('./routes/games');
+const chatRoutes = require('./routes/chat');
 
 // Создаем экземпляр Express-приложения
 const app = express()
@@ -34,10 +35,25 @@ connection.once('open', () => {
     console.log('Подключение к базе данных MongoDB установлено')
 })
 
-// Запускаем сервер на указанном порту и выводим сообщение о его успешном запуске
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Сервер запущен на порту: ${PORT}`)
-})
-
+// Подключаем роуты
 app.use('/api/users', authRoutes)
 app.use('/api/games', gamesRoutes)
+app.use('/api/chat', chatRoutes)
+
+// Подключаем Socket.IO
+const http = require('http');
+const server = http.createServer(app);
+const io = require('socket.io')(server, {
+  cors: {
+    origin: "*", // В продакшене укажите конкретный домен
+    methods: ["GET", "POST"]
+  }
+});
+
+// Подключаем обработчик чата
+require('./socket/chatHandler')(io);
+
+// Запускаем сервер на указанном порту и выводим сообщение о его успешном запуске
+server.listen(PORT, '0.0.0.0', () => {
+  console.log(`Сервер запущен на порту: ${PORT}`)
+})
