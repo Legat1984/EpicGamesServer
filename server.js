@@ -46,8 +46,11 @@ const server = http.createServer(app);
 const io = require('socket.io')(server, {
   cors: {
     origin: "*", // В продакшене укажите конкретный домен
-    methods: ["GET", "POST"]
-  }
+    methods: ["GET", "POST"],
+    credentials: true
+  },
+  transports: ['websocket', 'polling'], // Указываем доступные транспорты
+  allowEIO3: true // Разрешаем версию Engine.IO 3
 });
 
 // Подключаем обработчик чата
