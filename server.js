@@ -65,6 +65,11 @@ const io = require('socket.io')(server, {
 // Подключаем обработчик чата
 require('./socket/chatHandler')(io);
 
+// Обработка ошибок сокета на уровне сервера
+io.on('connection_error', (error) => {
+  console.log('Ошибка подключения сокета:', error.message);
+});
+
 // Запускаем сервер на указанном порту и выводим сообщение о его успешном запуске
 server.listen(PORT, '0.0.0.0', () => {
   console.log(`Сервер запущен на порту: ${PORT}`)

@@ -3,11 +3,11 @@ const jwt = require('jsonwebtoken');
 const authMiddleware = (req, res, next) => {
     const authHeader = req.header('Authorization');
     if (!authHeader) {
-        return res.status(200).json({ errors: 'Требуется авторизация' });
+        return res.status(401).json({ errors: 'Требуется авторизация' });
     }
     const token = authHeader.replace('Bearer ', '');
     if (!token) {
-        return res.status(200).json({ errors: 'Требуется авторизация' });
+        return res.status(401).json({ errors: 'Требуется авторизация' });
     }
 
     try {
@@ -15,7 +15,7 @@ const authMiddleware = (req, res, next) => {
         req.user = decoded;
         next();
     } catch (err) {
-        return res.status(200).json({ errors: 'Неверный или истекший токен' });
+        return res.status(401).json({ errors: 'Неверный или истекший токен' });
     }
 };
 

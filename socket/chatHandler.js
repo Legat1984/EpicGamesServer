@@ -2,14 +2,36 @@ const Message = require('../models/Message');
 const Room = require('../models/Room');
 const User = require('../models/User');
 
+const jwt = require('jsonwebtoken');
+
 module.exports = (io) => {
+  io.use((socket, next) => {
+    const token = socket.handshake.auth.token || socket.handshake.query.token;
+
+    if (!token) {
+      console.log('Токен отсутствует при подключении сокета');
+      return next(new Error('Требуется авторизация'));
+    }
+
+    try {
+      const decoded = jwt.verify(token, process.env.SECRET_KEY);
+      socket.user = decoded;
+      next();
+    } catch (err) {
+      console.log('Ошибка проверки токена при подключении сокета:', err.message);
+      next(new Error('Неверный или истекший токен'));
+    }
+  });
+
   io.on('connection', (socket) => {
     console.log('Пользователь подключился:', socket.id);
+    console.log('Пользователь ID:', socket.user.userId || socket.user.id);
 
     // Присоединение к комнате
     socket.on('joinRoom', async (data) => {
       try {
-        const { roomId, userId } = data;
+        const { roomId } = data;
+        const userId = socket.user.userId || socket.user.id;
 
         // Проверяем существование комнаты
         const room = await Room.findById(roomId);
@@ -49,7 +71,8 @@ module.exports = (io) => {
     // Отправка сообщения
     socket.on('sendMessage', async (data) => {
       try {
-        const { roomId, userId, text } = data;
+        const { roomId, text } = data;
+        const userId = socket.user.userId || socket.user.id;
 
         // Создаем новое сообщение в базе данных
         const newMessage = new Message({
@@ -80,7 +103,8 @@ module.exports = (io) => {
     // Выход из комнаты
     socket.on('leaveRoom', async (data) => {
       try {
-        const { roomId, userId } = data;
+        const { roomId } = data;
+        const userId = socket.user.userId || socket.user.id;
 
         socket.leave(roomId);
 
@@ -100,9 +124,14 @@ module.exports = (io) => {
       }
     });
 
+    // Обработка ошибок
+    socket.on('error', (error) => {
+      console.log('Ошибка сокета:', error.message);
+    });
+
     // Отключение пользователя
     socket.on('disconnect', () => {
-      console.log('Пользователь отключился:', socket.id);
+      console.log('Пользователь отключился:', socket.id, 'User ID:', socket.user.userId || socket.user.id);
     });
   });
 };
